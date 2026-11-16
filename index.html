@@ -158,6 +158,13 @@
 </div>
 
 <div id="side">
+  <div id="route-control" class="hud">
+    <div style="font-weight:700;margin-bottom:6px">운행 노선</div>
+    <select id="game-route" aria-label="운행 노선 선택" style="width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)">
+      <option value="-1">노선 미선택 · 자유주행</option>
+    </select>
+    <div id="game-route-info" style="font-size:12px;color:var(--mute);margin-top:5px">운행 중 노선을 선택할 수 있습니다.</div>
+  </div>
   <div id="pax" class="hud">
     <div class="ttl"><b id="route-name">노선 없음</b><small id="pax-cap">정원 60명</small></div>
     <div class="main">
@@ -207,28 +214,16 @@
   <div class="card">
     <section id="garage-step">
       <h1>운행 준비</h1>
-      <label class="field">차고지 선택
-        <select id="sel-garage" aria-label="차고지 선택"></select>
-        <span class="info" id="garage-info">차고지 정보를 불러오는 중…</span>
-      </label>
-      <p class="msg" id="start-msg">불러오는 중…</p>
-      <button id="btn-enter-depot" class="primary go" type="button" disabled>차고지 입장</button>
-    </section>
-    <section id="route-step" hidden>
-      <h1 id="selected-depot-title">노선 선택</h1>
       <label class="field">버스
         <select id="sel-bus" aria-label="버스 선택"></select>
         <span class="info" id="bus-info"></span>
       </label>
-      <label class="field">노선
-        <select id="sel-route" aria-label="노선 선택"></select>
-        <span class="info" id="route-info"></span>
+      <label class="field">출발 차고지
+        <select id="sel-garage" aria-label="차고지 선택"></select>
+        <span class="info" id="garage-info">차고지 정보를 불러오는 중…</span>
       </label>
-      <p class="msg" id="route-msg"></p>
-      <div style="display:flex;gap:8px">
-        <button id="btn-back-garage" type="button">차고지 변경</button>
-        <button id="btn-start" class="primary go" type="button" disabled>운행 시작</button>
-      </div>
+      <p class="msg" id="start-msg">불러오는 중…</p>
+      <button id="btn-start" class="primary go" type="button" disabled>자유주행 시작</button>
     </section>
     <div class="keys">W/S 가속·브레이크 · A/D 조향 · F/G 앞문·뒷문 · P 주차브레이크<br>Z/X 지도 확대·축소 · 0/9 카메라 기울기 · / 정지화면</div>
   </div>
@@ -780,6 +775,8 @@
       if (!best) { st.noSwitch = true; toast('회차점이에요. 같은 번호의 반대 방향 노선 파일(route 폴더)이 없어요'); return; }
       bell.count = 0;
       applyRoute(best.parsed, best.f);
+      if (gameRoute) { gameRoute.value = String(routeFiles.indexOf(best.f)); setText($('game-route-info'), displayName(best.f) + ' 자동 회차 전환 완료'); }
+      S.route = best.f; saveS();
       // 회차지에서 이미 승하차를 마쳤으니, 같은 자리의 새 노선 첫 정류소는 다시 서비스하지 않음
       for (const s2 of stops) if (distM(car.lat, car.lng, s2.lat, s2.lng) <= CFG.stopRadius + 10) setStopState(s2, 'done');
       toast('회차 완료 · ' + displayName(best.f) + ' 노선으로 전환' + (paxTotal() ? ' · 승객 ' + paxTotal() + '명 탑승 중' : ''));
@@ -961,10 +958,11 @@
     if (window.BusAudio) BusAudio.pause(true);
     document.body.classList.add('menu');
     $('start').hidden = false;
-    $('route-step').hidden = true;
     $('garage-step').hidden = false;
     selectedDepot = null;
     routeFiles = routeCatalog.slice();
+    $('game-route').innerHTML = '<option value="-1">노선 미선택 · 자유주행</option>';
+    setText($('game-route-info'), '운행 중 노선을 선택할 수 있습니다.');
   }
 
   // ───────── 입력 (PC 키보드) ─────────
@@ -1034,27 +1032,22 @@
   if (window.BusAudio) BusAudio.setVolume(S.soundVolume);
   soundVolume.addEventListener('input', e => { S.soundVolume = Number(e.target.value); setText($('sound-volume-value'), Math.round(S.soundVolume * 100) + '%'); if (window.BusAudio) BusAudio.setVolume(S.soundVolume); saveS(); });
 
-  // ───────── 초기화면 / 차고지 → 운행 노선 선택 ─────────
-  const selGarage = $('sel-garage'), selBus = $('sel-bus'), selRoute = $('sel-route');
-  const btnEnterDepot = $('btn-enter-depot'), btnBackGarage = $('btn-back-garage'), btnStart = $('btn-start');
+  // ───────── 초기화면 / 차고지 선택 → 자유주행 → 운행 중 노선 선택 ─────────
+  const selGarage = $('sel-garage'), selBus = $('sel-bus');
+  const btnStart = $('btn-start'), gameRoute = $('game-route');
+  let selectingRoute = false;
   function showBusInfo() {
     const c = cars[Number(selBus.value)];
     setText($('bus-info'), c ? (c.transmission === 'manual' ? '수동' : '자동') + ' 변속 · 정원 ' + c.capacity + '명 · 리타더 ' + (c.retarder ? '있음' : '없음') : '');
-  }
-  function showRouteInfo() {
-    const idx = Number(selRoute.value);
-    const f = idx >= 0 ? routeFiles[idx] : null;
-    setText($('route-info'), f ? 'route/' + f : '노선 없이 자유주행');
   }
   function renderDepotInfo() {
     const d = depots[Number(selGarage.value)];
     const companies = d && d.operators.length ? '이용 운수사: ' + d.operators.join(', ') : '운수사 정보는 garage.kml 설명에 추가할 수 있어요.';
     setText($('garage-info'), d ? companies : '차고지 정보가 없습니다.');
-    btnEnterDepot.disabled = !d || !cars.length;
+    btnStart.disabled = !d || !cars.length;
   }
   selGarage.addEventListener('change', renderDepotInfo);
   selBus.addEventListener('change', showBusInfo);
-  selRoute.addEventListener('change', showRouteInfo);
 
   async function initMenu() {
     const errors = [];
@@ -1078,55 +1071,91 @@
       if (S.bus && c.file === S.bus) selBus.value = String(i);
     });
     renderDepotInfo(); showBusInfo();
-    setText($('start-msg'), errors.length ? '일부 파일을 읽지 못했어요: ' + errors.join(' / ') : '출발할 차고지를 선택하세요.');
-    btnEnterDepot.disabled = !depots.length || !cars.length;
+    setText($('start-msg'), errors.length ? '일부 파일을 읽지 못했어요: ' + errors.join(' / ') : '버스와 출발 차고지를 선택하세요. 노선은 게임에 들어간 뒤 고를 수 있습니다.');
+    btnStart.disabled = !depots.length || !cars.length;
     if (!depots.length) setText($('start-msg'), 'garage.kml 또는 depot/index.json을 읽지 못했어요.');
   }
 
-  function enterSelectedDepot() {
-    selectedDepot = depots[Number(selGarage.value)];
-    if (!selectedDepot) return;
-    START.lat = selectedDepot.lat; START.lng = selectedDepot.lng; START.heading = 0;
-    if (mapReady) moveMapCamera([START.lng, START.lat], S.zoom, 0);
-    const allowed = selectedDepot.routes;
-    const assignedRoutes = allowed.includes('*') ? routeCatalog.slice() : routeCatalog.filter(f => allowed.includes(f));
-    routeFiles = assignedRoutes;
-    selRoute.innerHTML = '';
+  function populateGameRoutes() {
+    gameRoute.innerHTML = '';
     const free = document.createElement('option');
-    free.value = '-1'; free.textContent = '자유주행'; selRoute.appendChild(free);
+    free.value = '-1'; free.textContent = '노선 미선택 · 자유주행';
+    gameRoute.appendChild(free);
     routeFiles.forEach((f, i) => {
       const o = document.createElement('option');
-      o.value = String(i); o.textContent = displayName(f); selRoute.appendChild(o);
+      o.value = String(i); o.textContent = displayName(f);
+      gameRoute.appendChild(o);
     });
-    if (S.route) {
-      const idx = routeFiles.indexOf(S.route);
-      if (idx >= 0) selRoute.value = String(idx);
-    }
-    setText($('selected-depot-title'), selectedDepot.name + ' · 노선 선택');
-    const companyText = selectedDepot.operators.length ? selectedDepot.operators.join(', ') : '운수사 미등록';
-    setText($('route-msg'), companyText + (routeFiles.length ? ' · 배정 노선 ' + routeFiles.length + '개' : ' · 등록된 노선이 없어 자유주행만 가능합니다.'));
-    $('garage-step').hidden = true;
-    $('route-step').hidden = false;
-    showRouteInfo();
-    btnStart.disabled = !cars.length;
+    gameRoute.value = '-1';
+    gameRoute.disabled = false;
+    setText($('game-route-info'), routeFiles.length ? '현재 차고지에 배정된 노선 ' + routeFiles.length + '개' : '이 차고지에는 등록된 노선이 없습니다. 자유주행을 이용하세요.');
   }
-  btnEnterDepot.addEventListener('click', enterSelectedDepot);
-  btnBackGarage.addEventListener('click', () => {
-    $('route-step').hidden = true;
-    $('garage-step').hidden = false;
-    selectedDepot = null;
-    routeFiles = routeCatalog.slice();
-  });
+
+  function clearActiveRoute() {
+    clearMarkers();
+    stops = []; garages = []; firstPlace = null;
+    currentParsed = null; currentFile = null; route = null;
+    startFile = null; startParsed = null;
+    busS = 0; progT = 0;
+    const routeSrc = mapReady && map.getSource('route');
+    const guideSrc = mapReady && map.getSource('route-guide');
+    if (routeSrc) routeSrc.setData(emptyLine);
+    if (guideSrc) guideSrc.setData(emptyLine);
+    setText($('route-name'), '자유주행');
+    S.route = null; saveS();
+    setText($('game-route-info'), '노선 없이 자유롭게 운행 중입니다.');
+  }
+
+  async function selectGameRoute() {
+    if (selectingRoute || phase !== 'play' || !selectedDepot) return;
+    const value = Number(gameRoute.value);
+    if (value < 0) {
+      clearActiveRoute();
+      toast('자유주행으로 전환했습니다.');
+      return;
+    }
+    const file = routeFiles[value];
+    if (!file) return;
+    selectingRoute = true;
+    gameRoute.disabled = true;
+    try {
+      const parsed = parseKML(await loadRouteText(file));
+      if (!routeUsable(parsed)) throw new Error('KML에 노선(선) 또는 점 2개 이상이 필요합니다.');
+      applyRoute(parsed, file);
+      // 운행 중 노선을 지정하므로 버스 위치는 유지하고, 현재 위치보다 충분히 뒤에 있는 정류소는 통과한 것으로 처리
+      const projection = projectOnRoute(car.lng, car.lat);
+      busS = projection.s;
+      progT = 0;
+      for (const st of stops) {
+        if (st.s < busS - 40) setStopState(st, 'passed');
+      }
+      startFile = file; startParsed = parsed;
+      S.route = file; saveS();
+      setText($('game-route-info'), displayName(file) + ' 운행 중 · 버스 위치 유지');
+      toast(displayName(file) + ' 노선을 선택했습니다. 현재 위치에서 운행을 이어갑니다.');
+    } catch (e) {
+      gameRoute.value = currentFile ? String(routeFiles.indexOf(currentFile)) : '-1';
+      setText($('game-route-info'), e.message || '노선을 불러오지 못했습니다.');
+      toast('노선을 불러오지 못했습니다.');
+    } finally {
+      selectingRoute = false;
+      gameRoute.disabled = false;
+    }
+  }
+  gameRoute.addEventListener('change', selectGameRoute);
 
   async function beginGame() {
     const c = cars[Number(selBus.value)];
+    selectedDepot = depots[Number(selGarage.value)];
     if (!c || !selectedDepot) return;
-    // 오디오는 사용자 클릭 직후 활성화하되, 음원 다운로드·디코딩을 기다리느라
-    // 게임 시작이 막히지 않도록 백그라운드에서 준비한다.
     btnStart.disabled = true;
     try {
+      // 선택한 차고지를 시작점으로 삼고, 최초 진입은 노선 없는 자유주행으로 시작
+      START.lat = selectedDepot.lat; START.lng = selectedDepot.lng; START.heading = 0;
+      routeFiles = selectedDepot.routes.includes('*') ? routeCatalog.slice() : routeCatalog.filter(f => selectedDepot.routes.includes(f));
+      clearActiveRoute();
+      populateGameRoutes();
       if (window.BusAudio) {
-        // 클릭 이벤트 안에서 오디오 컨텍스트를 먼저 깨우고, 프로필은 한 번만 비동기로 로드한다.
         BusAudio.unlock()
           .then(() => { BusAudio.pause(false); return BusAudio.loadProfile(c.sound); })
           .catch(audioError => {
@@ -1134,23 +1163,14 @@
             toast('엔진음을 불러오지 못했어요. 개발자 콘솔에서 경로를 확인해 주세요.');
           });
       }
-      const routeIndex = Number(selRoute.value);
-      const rf = routeIndex >= 0 ? routeFiles[routeIndex] : null;
-      let parsed = null;
-      if (rf) {
-        try { parsed = parseKML(await loadRouteText(rf)); } catch (e) { setText($('route-msg'), e.message); return; }
-        if (parsed && !routeUsable(parsed)) { setText($('route-msg'), 'KML에 노선(선) 또는 점 2개 이상이 필요해요'); return; }
-      }
       applyCar(c);
-      S.bus = c.file; S.route = rf || null; saveS();
-      if (parsed) { startFile = rf; startParsed = parsed; applyRoute(parsed, rf); startFromRoute(); }
-      else { startFile = null; startParsed = null; currentParsed = null; currentFile = null; clearMarkers(); stops = []; route = null; setText($('route-name'), '자유주행'); }
+      S.bus = c.file; S.route = null; saveS();
       resetAll();
       phase = 'play';
       $('start').hidden = true;
       document.body.classList.remove('menu');
       last = performance.now();
-      toast(c.name + ' · ' + selectedDepot.name + (rf ? ' · ' + displayName(rf) : ' · 자유주행') + ' 출발 준비 완료');
+      toast(c.name + ' · ' + selectedDepot.name + ' 자유주행 시작');
     } finally { btnStart.disabled = false; }
   }
   btnStart.addEventListener('click', () => { beginGame(); });
