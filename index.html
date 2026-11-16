@@ -739,7 +739,7 @@
       const match = configured.find(d => d.placemark === p.name) || {};
       const descOperators = (p.desc.match(/(?:운수사|운영사|operator)\s*[:：]\s*([^\n;]+)/i) || [])[1];
       const fromDesc = descOperators ? descOperators.split(/[,，、|]/).map(x => x.trim()).filter(Boolean) : [];
-      const operators = [...new Set([...(match.operators || []), ...fromDesc])];
+      const operators = [...new Set([...(Array.isArray(match.operators) ? match.operators : []), ...fromDesc])];
       return {
         id: match.id || ('garage-' + i), placemark: p.name,
         name: match.name || p.name, operators,
@@ -1042,14 +1042,15 @@
     setText($('bus-info'), c ? (c.transmission === 'manual' ? '수동' : '자동') + ' 변속 · 정원 ' + c.capacity + '명 · 리타더 ' + (c.retarder ? '있음' : '없음') : '');
   }
   function showRouteInfo() {
-    const f = routeFiles[Number(selRoute.value)];
+    const idx = Number(selRoute.value);
+    const f = idx >= 0 ? routeFiles[idx] : null;
     setText($('route-info'), f ? 'route/' + f : '노선 없이 자유주행');
   }
   function renderDepotInfo() {
     const d = depots[Number(selGarage.value)];
     const companies = d && d.operators.length ? '이용 운수사: ' + d.operators.join(', ') : '운수사 정보는 garage.kml 설명에 추가할 수 있어요.';
     setText($('garage-info'), d ? companies : '차고지 정보가 없습니다.');
-    btnEnterDepot.disabled = !d;
+    btnEnterDepot.disabled = !d || !cars.length;
   }
   selGarage.addEventListener('change', renderDepotInfo);
   selBus.addEventListener('change', showBusInfo);
@@ -1062,11 +1063,13 @@
     routeCatalog = await loadRouteList();
     routeFiles = routeCatalog.slice();
     try { await loadDepots(); } catch (e) { errors.push('차고지: ' + e.message); }
+    selGarage.innerHTML = '';
     depots.forEach((d, i) => {
       const o = document.createElement('option');
       o.value = String(i); o.textContent = d.name;
       selGarage.appendChild(o);
     });
+    selBus.innerHTML = '';
     cars.forEach((c, i) => {
       const o = document.createElement('option');
       o.value = String(i);
@@ -1089,11 +1092,16 @@
     const assignedRoutes = allowed.includes('*') ? routeCatalog.slice() : routeCatalog.filter(f => allowed.includes(f));
     routeFiles = assignedRoutes;
     selRoute.innerHTML = '';
-    const free = document.createElement('option'); free.value = '-1'; free.textContent = '자유주행'; selRoute.appendChild(free);
+    const free = document.createElement('option');
+    free.value = '-1'; free.textContent = '자유주행'; selRoute.appendChild(free);
     routeFiles.forEach((f, i) => {
-      const o = document.createElement('option'); o.value = String(i); o.textContent = displayName(f); selRoute.appendChild(o);
+      const o = document.createElement('option');
+      o.value = String(i); o.textContent = displayName(f); selRoute.appendChild(o);
     });
-    if (S.route) { const idx = routeFiles.indexOf(S.route); if (idx >= 0) selRoute.value = String(idx); }
+    if (S.route) {
+      const idx = routeFiles.indexOf(S.route);
+      if (idx >= 0) selRoute.value = String(idx);
+    }
     setText($('selected-depot-title'), selectedDepot.name + ' · 노선 선택');
     const companyText = selectedDepot.operators.length ? selectedDepot.operators.join(', ') : '운수사 미등록';
     setText($('route-msg'), companyText + (routeFiles.length ? ' · 배정 노선 ' + routeFiles.length + '개' : ' · 등록된 노선이 없어 자유주행만 가능합니다.'));
@@ -1104,18 +1112,21 @@
   }
   btnEnterDepot.addEventListener('click', enterSelectedDepot);
   btnBackGarage.addEventListener('click', () => {
-    $('route-step').hidden = true; $('garage-step').hidden = false;
+    $('route-step').hidden = true;
+    $('garage-step').hidden = false;
     selectedDepot = null;
-    // 차고지를 다시 선택할 때 전체 노선 목록을 복구한다.
     routeFiles = routeCatalog.slice();
   });
 
   async function beginGame() {
     const c = cars[Number(selBus.value)];
     if (!c || !selectedDepot) return;
+    // 오디오는 사용자 클릭 직후 활성화하되, 음원 다운로드·디코딩을 기다리느라
+    // 게임 시작이 막히지 않도록 백그라운드에서 준비한다.
     btnStart.disabled = true;
     try {
       if (window.BusAudio) {
+        // 클릭 이벤트 안에서 오디오 컨텍스트를 먼저 깨우고, 프로필은 한 번만 비동기로 로드한다.
         BusAudio.unlock()
           .then(() => { BusAudio.pause(false); return BusAudio.loadProfile(c.sound); })
           .catch(audioError => {
