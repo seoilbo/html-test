@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "descriptionFormat": "garage.kml Placemark description: 운수사: 회사A, 회사B (쉼표 구분). depot/index.json의 operators와 합쳐 표시합니다.",
+  "depots": [
+    {
+      "id": "myeonmok",
+      "placemark": "북부운수",
+      "name": "북부운수 면목동 차고지",
+      "operators": [
+        "북부운수"
+      ],
+      "routes": []
+    },
+    {
+      "id": "sinnae-shared",
+      "placemark": "중랑차고지",
+      "name": "중랑차고지",
+      "operators": [
+        "북부운수",
+        "대원 계열사",
+        "메트로버스"
+      ],
+      "routes": [
+        "2416.kml"
+      ]
+    }
+  ]
+}
