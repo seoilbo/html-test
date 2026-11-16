@@ -334,13 +334,14 @@
     emgUp: 6.0, emgDown: 4.0,   // 비상 브레이크
     steerRate: 45,       // 핸들 돌리는 속도 (도/초)
     steerReturn: 70,     // 핸들 복귀 속도
-    comfortOk: 2.2,      // 미만: 쾌적 (m/s²)
-    comfortWarn: 3.5,    // 이상: 서 있는 승객이 넘어질 수 있음
+    comfortOk: 2.6,      // 미만: 쾌적 (m/s²)
+    comfortWarn: 4.2,    // 이상: 승객이 불안함을 느낄 수 있음
+    comfortFall: 5.8,   // 넘어짐 판정에 사용하는 높은 가속도 기준
     stopRadius: 30,      // 정류소 정차 인정 반경 (m)
     ringDist: [250, 450],// 하차벨이 눌리는 정류소 접근 거리 (m)
-    alightSec: [0.5, 0.9],  // 1명 하차 시간: [뒷문, 앞문] (초)
-    boardSec: 0.9,       // 1명 승차 시간 (앞문, 초)
-    maxWaiting: 40       // 정류소 대기 승객 상한
+    alightSec: [0.65, 1.0], // 1명 하차 시간: [뒷문, 앞문] (초)
+    boardSec: 1.15,       // 1명 승차 시간 (앞문, 초)
+    maxWaiting: 18,       // 정류소 대기 승객 상한
   };
 
   let VEH = null, IDLE = 650, REDLINE = 2600, MAXG = 5;
@@ -470,7 +471,7 @@
   const keys = { up: false, down: false, left: false, right: false, hand: false, clutch: false };
   const doors = { f: { open: false, pos: 0 }, r: { open: false, pos: 0 } };
   const bell = { count: 0 };   // 하차벨을 누른(내리려는) 승객 수
-  const pax = { seated: 0, standing: 0, fell: 0, skipped: 0, fallUntil: 0, lastFall: 0, last: null, totalIn: 0, totalOut: 0 };
+  const pax = { seated: 0, standing: 0, trips: [], fell: 0, skipped: 0, fallUntil: 0, lastFall: 0, last: null, totalIn: 0, totalOut: 0 };
   let route = null;          // { name, pts: [[lng, lat], ...] }
   let stops = [];            // 노선 순서대로 정렬된 정류소
   let currentFile = null, currentParsed = null;   // 지금 운행 중인 노선 (회차하면 바뀜)
@@ -600,8 +601,8 @@
     stops.forEach((st, i) => {
       if (!st.name || /^제목 없는/.test(st.name)) st.name = '정류소 ' + (i + 1);
       st.turn = TURN_RE.test(st.desc);                              // 설명에 '회차점'이 적힌 정류소 = 회차지(종점)
-      st.waiting = st.turn ? randInt(3, 15) : randInt(0, 18);       // 대기 승객 (랜덤)
-      st.growT = randInt(10, 25);
+      st.waiting = st.turn ? randInt(0, 4) : randInt(0, 6);       // 초기 대기 인원 축소
+      st.growT = randInt(45, 90);
       st.ringDist = randInt(CFG.ringDist[0], CFG.ringDist[1]);
     });
     busS = 0; progT = 0;
@@ -785,20 +786,36 @@
 
   // ───────── 승객 ─────────
   const paxTotal = () => pax.seated + pax.standing;
+  const duePax = () => pax.trips.filter(t => t.remaining <= 1).length;
   function addPax(k) {
+    const stopIndex = stops.findIndex(st => st.state === 'servicing');
+    const ahead = stopIndex >= 0 ? Math.max(2, stops.length - stopIndex - 1) : Math.max(2, stops.length);
+    const maxRide = Math.min(7, ahead);
     for (let i = 0; i < k; i++) {
-      if (pax.seated < VEH.seats && Math.random() < 0.75) pax.seated++; else pax.standing++;
+      const seated = pax.seated < VEH.seats && (pax.standing === 0 || Math.random() < 0.82);
+      if (seated) pax.seated++; else pax.standing++;
+      // 승객마다 최소 2개 정류소 이후의 목적지를 부여. 회차점에서는 기존 승객 전원이 하차.
+      const rideStops = maxRide >= 3 ? randInt(2, maxRide) : 2;
+      pax.trips.push({ remaining: rideStops, seated });
     }
   }
-  function removePax(k) {
+  function removePax(k, forceAll) {
     for (let i = 0; i < k; i++) {
-      const n = paxTotal();
-      if (!n) break;
-      if (Math.random() < pax.seated / n) pax.seated--; else pax.standing--;
+      if (!pax.trips.length) break;
+      let idx = forceAll ? 0 : pax.trips.findIndex(t => t.remaining <= 0);
+      if (idx < 0) break;
+      const [t] = pax.trips.splice(idx, 1);
+      if (t.seated) pax.seated = Math.max(0, pax.seated - 1);
+      else pax.standing = Math.max(0, pax.standing - 1);
     }
   }
   function rebalanceSeats() {
-    while (pax.seated < VEH.seats && pax.standing > 0 && Math.random() < 0.6) { pax.standing--; pax.seated++; }
+    // 입석 승객이 빈 좌석으로 이동하는 상황을 간단히 반영
+    while (pax.seated < VEH.seats && pax.standing > 0 && Math.random() < 0.6) {
+      const idx = pax.trips.findIndex(t => !t.seated);
+      if (idx < 0) break;
+      pax.trips[idx].seated = true; pax.standing--; pax.seated++;
+    }
   }
 
   // ───────── 문 / 주차 브레이크 ─────────
@@ -822,7 +839,7 @@
     if (window.BusAudio) BusAudio.playBell();
     const total = paxTotal();
     if (st.turn) bell.count = total;                   // 회차점: 전원 하차
-    else if (bell.count === 0) bell.count = Math.min(total, Math.max(1, Math.round(total * (0.1 + Math.random() * 0.4))));   // 탑승객의 10~50%가 하차벨
+    else bell.count = Math.min(total, duePax());       // 목적지에 도착한 승객만 하차벨
   }
   // 뒤쪽 정류소에 서거나 지나쳤다면 그 앞의 미처리 정류소는 지나친 것으로 처리
   function passEarlier(st) {
@@ -831,8 +848,12 @@
   }
   function beginService(st) {
     passEarlier(st);
+    // 정류소에 도착할 때 기존 승객의 남은 이용 정류소 수를 한 칸 줄임.
+    // 이번 정류소에서 새로 타는 승객은 승차 이후에 목적지 카운트를 부여받음.
+    pax.trips.forEach(t => { t.remaining = Math.max(0, t.remaining - 1); });
     const total = paxTotal();
-    const outPlan = st.turn ? total : Math.min(total, bell.count);
+    const outPlan = st.turn ? total : Math.min(total, pax.trips.filter(t => t.remaining <= 0).length);
+    bell.count = outPlan;
     const room = Math.max(0, VEH.capacity - (total - outPlan));
     const inPlan = Math.min(st.waiting, room);       // 회차지에서도 승차 가능 (전원 하차 후 대기 승객이 탑승)
     st.sess = { outPlan, inPlan, outDone: 0, inDone: 0, tOut: 0, tIn: 0, full: st.waiting > room };
@@ -863,7 +884,7 @@
       s.tOut += dt;
       const per = rearOpen ? CFG.alightSec[0] : CFG.alightSec[1];
       while (s.tOut >= per && s.outDone < s.outPlan && paxTotal() > 0) {
-        s.tOut -= per; removePax(1); s.outDone++; pax.totalOut++; bell.count = Math.max(0, bell.count - 1);
+        s.tOut -= per; removePax(1, st.turn); s.outDone++; pax.totalOut++; bell.count = Math.max(0, bell.count - 1);
       }
     }
     // 승차: 앞문
@@ -887,7 +908,7 @@
     for (const st of stops) {
       if (st.state !== 'pending') continue;
       st.growT -= dt;
-      if (st.growT <= 0) { st.waiting = Math.min(CFG.maxWaiting, st.waiting + 1); st.growT = randInt(10, 25); refreshStop(st); }
+      if (st.growT <= 0) { st.waiting = Math.min(CFG.maxWaiting, st.waiting + 1); st.growT = randInt(45, 90); refreshStop(st); }
     }
     // 노선상 위치로 이미 지나친 정류소 처리 (정류소 반경을 비켜 갔거나 건너뛴 경우에도 '다음 정류소'가 막히지 않게)
     progT += dt;
@@ -904,7 +925,7 @@
     // 다음 정류소에 가까워지면 승객이 하차벨을 누름
     const nx = stops.find(s => s.state === 'pending');
     const servicingNow = stops.some(s => s.state === 'servicing');   // 직전 정류소에서 승하차 중이면 끝난 뒤에 계산
-    if (nx && !nx.ringDone && !servicingNow && paxTotal() > 0 && distM(car.lat, car.lng, nx.lat, nx.lng) < nx.ringDist) { nx.ringDone = true; ringBell(nx); }
+    if (nx && !nx.ringDone && !servicingNow && paxTotal() > 0 && distM(car.lat, car.lng, nx.lat, nx.lng) < nx.ringDist && (nx.turn || duePax() > 0)) { nx.ringDone = true; ringBell(nx); }
     if (nx && nx.turn && nx.ringDone) bell.count = paxTotal();      // 회차지에서는 탑승객 전원이 내림 (접근 중 탑승 인원이 바뀌어도 반영)
     // 서비스 중인 정류소
     let cur = stops.find(s => s.state === 'servicing');
@@ -1005,7 +1026,7 @@
     doors.f.open = doors.r.open = false; doors.f.pos = doors.r.pos = 0;
     if (window.BusAudio) BusAudio.setRetarder(0);
     bell.count = 0;
-    Object.assign(pax, { seated: 0, standing: 0, fell: 0, skipped: 0, fallUntil: 0, lastFall: 0, last: null, totalIn: 0, totalOut: 0 });
+    Object.assign(pax, { seated: 0, standing: 0, trips: [], fell: 0, skipped: 0, fallUntil: 0, lastFall: 0, last: null, totalIn: 0, totalOut: 0 });
     trailPts = []; setTrail([]);
     dangerTime = 0;
     moveMapCamera([START.lng, START.lat], S.zoom, START.heading);
@@ -1370,17 +1391,16 @@
     const aTot = Math.hypot(car.aLong, aLat);
     const level = aTot >= CFG.comfortWarn ? 'bad' : aTot >= CFG.comfortOk ? 'warn' : 'ok';
     el.comfort.className = 'comfort ' + level;
-    el.cmsg.textContent = level === 'ok' ? '승객 쾌적' : level === 'warn' ? '승객 불안' : '승객 넘어짐 위험!';
+    el.cmsg.textContent = level === 'ok' ? '승객 쾌적' : level === 'warn' ? '승객 불안' : '강한 흔들림';
     el.cg.textContent = aTot.toFixed(1) + ' m/s²';
-    dangerTime = level === 'bad' ? dangerTime + dt : 0;
-    if (dangerTime > 0.4 && now / 1000 - lastFall > 4) {
+    dangerTime = aTot >= CFG.comfortFall ? dangerTime + dt : 0;
+    if (dangerTime > 1.0 && now / 1000 - lastFall > 8) {
       lastFall = now / 1000; dangerTime = 0;
       if (pax.standing > 0) {
-        const k = Math.min(pax.standing, randInt(1, Math.max(1, Math.ceil(pax.standing * 0.35))));
-        pax.fell += k; pax.lastFall = k; pax.fallUntil = now / 1000 + 5;
-        toast('서 있던 승객 ' + k + '명이 넘어졌어요! 더 부드럽게 운전하세요');
-      } else if (pax.seated > 0) {
-        toast('급한 움직임! 앉아 있던 승객들이 놀랐어요');
+        // 넘어짐은 상당히 큰 가속도가 오래 지속될 때 드물게 발생하도록 제한
+        const k = Math.min(1, pax.standing);
+        pax.fell += k; pax.lastFall = k; pax.fallUntil = now / 1000 + 4;
+        toast('강한 충격으로 입석 승객 ' + k + '명이 넘어졌어요');
       }
     }
 
