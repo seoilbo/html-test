@@ -1,32 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:ex="http://earth.google.com/kml/ext">
-<Document id="document">
-	<ex:extension>base64;CooBCoEBCn8KAggBEnkKdwokCiAKAwjQDxoHCNLtZRD_ASEAAAAAAADwPykAAAAAAAAAABgAEg8KCAitgO8HEP8BEKAfGAAaGgoHCP___wcQQBIICK2A7wcQ_wEYoB8gACgAIgkIARIFCP___wcqFwgBEggI____BxD_ARkAAAAAAADwPyAAEgQIARAA</ex:extension>
+<Document id="1CQXsCI6rFmnbA9RJwbHO75zTjkvRJ8sL">
+	<ex:extension>base64;Co4BCoEBCn8KAggBEnkKdwokCiAKAwjQDxoHCNLtZRD_ASEAAAAAAADwPykAAAAAAAAAABgAEg8KCAitgO8HEP8BEKAfGAAaGgoHCP___wcQQBIICK2A7wcQ_wEYoB8gACgAIgkIARIFCP___wcqFwgBEggI____BxD_ARkAAAAAAADwPyAAEgQIARAAGgIIAA</ex:extension>
 	<name>2211(회기역)</name>
-	<gx:CascadingStyle kml:id="__managed_style_01937D019B430ABDE596_normal">
-		<ex:extension>base64;Eq4BGAEiqQEKpgEKT2h0dHBzOi8vZWFydGguZ29vZ2xlLmNvbS9iYWxsb29uX2NvbXBvbmVudHMvYmFzZS8xLjEuMC4wL2NhcmRfdGVtcGxhdGUua21sI21haW4SUwpPaHR0cHM6Ly9lYXJ0aC5nb29nbGUuY29tL2JhbGxvb25fY29tcG9uZW50cy9iYXNlL2N1cnJlbnQvY2FyZF90ZW1wbGF0ZS5rbWwjbWFpbhgA</ex:extension>
-		<styleUrl>https://earth.google.com/balloon_components/base/1.1.0.0/card_template.kml#main</styleUrl>
-		<Style>
-			<IconStyle>
-				<Icon>
-					<href>https://earth.google.com/earth/document/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
-				</Icon>
-				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
-			</IconStyle>
-			<LabelStyle>
-			</LabelStyle>
-			<LineStyle>
-				<color>ff2dc0fb</color>
-				<width>2.66667</width>
-			</LineStyle>
-			<PolyStyle>
-				<color>40ffffff</color>
-			</PolyStyle>
-			<BalloonStyle>
-			</BalloonStyle>
-		</Style>
-	</gx:CascadingStyle>
-	<gx:CascadingStyle kml:id="__managed_style_01937D019B430ABDE596_highlight">
+	<StyleMap id="__managed_style_16CE1CEE3D431C326C80">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_16CE1CEE3D431C326C80_normal</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_16CE1CEE3D431C326C80_highlight</styleUrl>
+		</Pair>
+	</StyleMap>
+	<gx:CascadingStyle kml:id="__managed_style_16CE1CEE3D431C326C80_highlight">
 		<ex:extension>base64;Eq4BGAEiqQEKpgEKT2h0dHBzOi8vZWFydGguZ29vZ2xlLmNvbS9iYWxsb29uX2NvbXBvbmVudHMvYmFzZS8xLjEuMC4wL2NhcmRfdGVtcGxhdGUua21sI21haW4SUwpPaHR0cHM6Ly9lYXJ0aC5nb29nbGUuY29tL2JhbGxvb25fY29tcG9uZW50cy9iYXNlL2N1cnJlbnQvY2FyZF90ZW1wbGF0ZS5rbWwjbWFpbhgA</ex:extension>
 		<styleUrl>https://earth.google.com/balloon_components/base/1.1.0.0/card_template.kml#main</styleUrl>
 		<Style>
@@ -50,7 +37,7 @@
 			</BalloonStyle>
 		</Style>
 	</gx:CascadingStyle>
-	<gx:CascadingStyle kml:id="__managed_style_049943FB5A430AAF1700_highlight">
+	<gx:CascadingStyle kml:id="__managed_style_01F3311B60431C326C80_highlight">
 		<ex:extension>base64;EgIYAQ</ex:extension>
 		<Style>
 			<IconStyle>
@@ -70,21 +57,33 @@
 				<color>40ffffff</color>
 			</PolyStyle>
 			<BalloonStyle>
-				<displayMode>hide</displayMode>
 			</BalloonStyle>
 		</Style>
 	</gx:CascadingStyle>
-	<StyleMap id="__managed_style_01937D019B430ABDE596">
-		<Pair>
-			<key>normal</key>
-			<styleUrl>#__managed_style_01937D019B430ABDE596_normal</styleUrl>
-		</Pair>
-		<Pair>
-			<key>highlight</key>
-			<styleUrl>#__managed_style_01937D019B430ABDE596_highlight</styleUrl>
-		</Pair>
-	</StyleMap>
-	<gx:CascadingStyle kml:id="__managed_style_049943FB5A430AAF1700_normal">
+	<gx:CascadingStyle kml:id="__managed_style_16CE1CEE3D431C326C80_normal">
+		<ex:extension>base64;Eq4BGAEiqQEKpgEKT2h0dHBzOi8vZWFydGguZ29vZ2xlLmNvbS9iYWxsb29uX2NvbXBvbmVudHMvYmFzZS8xLjEuMC4wL2NhcmRfdGVtcGxhdGUua21sI21haW4SUwpPaHR0cHM6Ly9lYXJ0aC5nb29nbGUuY29tL2JhbGxvb25fY29tcG9uZW50cy9iYXNlL2N1cnJlbnQvY2FyZF90ZW1wbGF0ZS5rbWwjbWFpbhgA</ex:extension>
+		<styleUrl>https://earth.google.com/balloon_components/base/1.1.0.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/document/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>2.66667</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_01F3311B60431C326C80_normal">
 		<ex:extension>base64;EgIYAQ</ex:extension>
 		<Style>
 			<IconStyle>
@@ -103,37 +102,19 @@
 				<color>40ffffff</color>
 			</PolyStyle>
 			<BalloonStyle>
-				<displayMode>hide</displayMode>
 			</BalloonStyle>
 		</Style>
 	</gx:CascadingStyle>
-	<StyleMap id="__managed_style_049943FB5A430AAF1700">
+	<StyleMap id="__managed_style_01F3311B60431C326C80">
 		<Pair>
 			<key>normal</key>
-			<styleUrl>#__managed_style_049943FB5A430AAF1700_normal</styleUrl>
+			<styleUrl>#__managed_style_01F3311B60431C326C80_normal</styleUrl>
 		</Pair>
 		<Pair>
 			<key>highlight</key>
-			<styleUrl>#__managed_style_049943FB5A430AAF1700_highlight</styleUrl>
+			<styleUrl>#__managed_style_01F3311B60431C326C80_highlight</styleUrl>
 		</Pair>
 	</StyleMap>
-	<Placemark id="06B20D9549430AAF169F">
-		<name>북부운수</name>
-		<LookAt>
-			<longitude>127.0846596997989</longitude>
-			<latitude>37.57319709006704</latitude>
-			<altitude>27.40434181797206</altitude>
-			<heading>0</heading>
-			<tilt>0</tilt>
-			<gx:fovy>30</gx:fovy>
-			<range>305.6303246104289</range>
-			<altitudeMode>absolute</altitudeMode>
-		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
-		<Point>
-			<coordinates>127.0847831184505,37.57328701984486,27.92926912945334</coordinates>
-		</Point>
-	</Placemark>
 	<Placemark id="0069B5D94B430AAF4D20">
 		<name>중곡초등학교</name>
 		<LookAt>
@@ -146,7 +127,7 @@
 			<range>305.8140302629545</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0842895448775,37.57327069803489,25.81011484669953</coordinates>
 		</Point>
@@ -163,7 +144,7 @@
 			<range>269.6879405344589</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0812051178584,37.5716675671832,18.04883386522334</coordinates>
 		</Point>
@@ -180,7 +161,7 @@
 			<range>192.6358772596541</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0735110452687,37.57228530283757,12.30036170310805</coordinates>
 		</Point>
@@ -197,7 +178,7 @@
 			<range>238.761513446334</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0708536884212,37.57110671374395,12.3064380367152</coordinates>
 		</Point>
@@ -214,7 +195,7 @@
 			<range>246.7613313981565</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0694750915654,37.56891689048908,11.85509316089239</coordinates>
 		</Point>
@@ -231,7 +212,7 @@
 			<range>246.0945118645759</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0678579887235,37.56641303485485,12.16127118791789</coordinates>
 		</Point>
@@ -248,7 +229,7 @@
 			<range>183.5757652587199</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0650713718798,37.56234829631061,11.38856986883533</coordinates>
 		</Point>
@@ -265,7 +246,7 @@
 			<range>209.7939875232987</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0613641940519,37.56208533917987,11.23541104030214</coordinates>
 		</Point>
@@ -282,7 +263,7 @@
 			<range>267.3373842953879</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0585200730753,37.56336221282396,13.03722878570995</coordinates>
 		</Point>
@@ -299,7 +280,7 @@
 			<range>326.7137119800464</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0621641049764,37.56661733545145,11.07948827031346</coordinates>
 		</Point>
@@ -316,7 +297,7 @@
 			<range>188.366331681591</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0639236833637,37.5689536538649,10.62124766257956</coordinates>
 		</Point>
@@ -333,7 +314,7 @@
 			<range>357.2014102898902</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0683132164113,37.57251392579899,10.92496440793048</coordinates>
 		</Point>
@@ -350,7 +331,7 @@
 			<range>288.940969705036</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0700359414501,37.57237557087918,11.68555856054983</coordinates>
 		</Point>
@@ -367,7 +348,7 @@
 			<range>173.800438896742</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0719569848296,37.57317377759073,12.60944788084678</coordinates>
 		</Point>
@@ -384,7 +365,7 @@
 			<range>267.8699359958773</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0720931077874,37.57509181007849,12.76394692888221</coordinates>
 		</Point>
@@ -401,7 +382,7 @@
 			<range>168.2946001688288</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0723157487633,37.57833997656068,12.30083335678662</coordinates>
 		</Point>
@@ -418,7 +399,7 @@
 			<range>148.4488154834253</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0706196360227,37.57882504239237,11.91636590194967</coordinates>
 		</Point>
@@ -435,7 +416,7 @@
 			<range>195.324165887796</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0684963181677,37.57976361370742,11.81241591927574</coordinates>
 		</Point>
@@ -452,7 +433,7 @@
 			<range>185.8231580030406</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0684965935316,37.58211627506869,13.5547571154296</coordinates>
 		</Point>
@@ -469,7 +450,7 @@
 			<range>227.5072360580089</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0676653637717,37.58569462115381,14.51169254592271</coordinates>
 		</Point>
@@ -486,7 +467,7 @@
 			<range>225.9807361865751</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0676982180697,37.58720619365197,15.78748537962058</coordinates>
 		</Point>
@@ -503,7 +484,7 @@
 			<range>196.6075327419458</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0680423520472,37.5907197654751,14.46539194555811</coordinates>
 		</Point>
@@ -520,7 +501,7 @@
 			<range>195.7465544585284</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0645969002021,37.59085246162666,14.87677263490223</coordinates>
 		</Point>
@@ -537,7 +518,7 @@
 			<range>313.4608301989283</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_049943FB5A430AAF1700</styleUrl>
+		<styleUrl>#__managed_style_01F3311B60431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0606544599515,37.58972709238084,16.44148192616043</coordinates>
 		</Point>
@@ -555,7 +536,7 @@
 			<range>297.3803508287165</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_01937D019B430ABDE596</styleUrl>
+		<styleUrl>#__managed_style_16CE1CEE3D431C326C80</styleUrl>
 		<Point>
 			<coordinates>127.0587719540993,37.58982370778425,19.49616763425738</coordinates>
 		</Point>
