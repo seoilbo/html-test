@@ -134,6 +134,50 @@
   #terminal .term-page[hidden] { display:none; }
   #terminal .term-muted { color:#9eb3cd; }
   #terminal .term-value { color:#f3f7ff; font-weight:700; font-variant-numeric:tabular-nums; }
+
+
+  #terminal-wrap {
+    position:absolute; z-index:1050; right:14px; bottom:14px;
+    width:330px; max-width:min(calc(100vw - 28px),390px);
+    display:flex; flex-direction:column; gap:7px;
+  }
+  #terminal-wrap #terminal-announcement {
+    position:relative; right:auto; bottom:auto; width:100%; max-width:none;
+  }
+  #terminal-wrap #terminal {
+    position:relative; right:auto; bottom:auto; width:100%; max-width:none;
+  }
+  body.menu #terminal-wrap, body.blocked #terminal-wrap { display:none; }
+
+  #terminal-announcement {
+    position:absolute; z-index:1051; right:14px; bottom: calc(14px + 100%);
+    width:330px; max-width:min(calc(100vw - 28px),390px);
+    box-sizing:border-box; display:flex; align-items:center; gap:8px;
+    padding:9px 12px; border:1px solid #38516f; border-radius:9px;
+    background:rgba(20,41,67,.97); color:#eef5ff;
+    box-shadow:0 5px 18px rgba(0,0,0,.22); backdrop-filter:blur(8px);
+    font-size:12px; line-height:1.4; min-height:36px;
+  }
+  .terminal-announcement-dot {
+    width:7px; height:7px; flex:none; border-radius:50%;
+    background:#70b7f4; box-shadow:0 0 8px rgba(112,183,244,.65);
+  }
+  #terminal-announcement.announce-wait .terminal-announcement-dot { background:#e6b75d; }
+  #terminal-announcement.announce-done .terminal-announcement-dot { background:#70d5a0; }
+  #terminal-announcement.announce-alert .terminal-announcement-dot { background:#f07878; }
+  #terminal .term-headway-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  #terminal .term-gap-value { font-size:23px; line-height:1.2; white-space:nowrap; }
+  #terminal .term-current-stop {
+    display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+    margin-top:9px; padding:7px 9px; border-radius:6px;
+    background:#142943; border:1px solid #304761;
+  }
+  #terminal .term-current-stop span { font-size:11px; }
+  #terminal .term-current-stop strong {
+    min-width:0; color:#eaf3ff; font-size:12px; font-weight:650;
+    text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+
   #terminal .term-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
   #terminal .term-cell { min-width:0; padding:9px 5px; text-align:center; background:#1a304b; border:1px solid #2d4562; border-radius:7px; }
   #terminal .term-cell.mine { background:#244d75; border-color:#6da8e2; }
@@ -155,6 +199,8 @@
   #terminal #pax .state.bad { color:#ff8d8d; }
   #terminal #bell { border-color:#762020; }
   @media (max-width: 700px) {
+    #terminal-wrap { right:8px; bottom:8px; width:min(330px,calc(100vw - 16px)); }
+
     #terminal { right:8px; bottom:8px; width:min(330px, calc(100vw - 16px)); }
     #dash { left:8px; bottom:8px; width:180px; }
   }
@@ -243,6 +289,11 @@
   </div>
 </div>
 
+<div id="terminal-wrap">
+<div id="terminal-announcement" role="status" aria-live="polite">
+  <span class="terminal-announcement-dot"></span>
+  <span id="terminal-announcement-text">운행 안내를 준비하고 있습니다.</span>
+</div>
 <div id="terminal" hidden aria-label="운행정보 단말기">
   <div class="term-head">
     <strong>운행정보 단말기</strong>
@@ -276,29 +327,28 @@
   </div>
   </section>
   <section class="term-page" data-terminal-page="headway" hidden>
-    <div class="term-grid">
+    <div class="term-grid term-headway-grid">
       <div class="term-cell">
         <div class="term-role">선행 차량</div>
-        <div class="term-distance" id="headway-front">확인 불가</div>
-        <div class="term-sub">앞쪽 운행 차량</div>
-      </div>
-      <div class="term-cell mine">
-        <div class="term-role">현 위치</div>
-        <div class="term-distance" id="headway-current-stop">정류소 확인 중</div>
-        <div class="term-sub">현재 정류소</div>
+        <div class="term-distance term-gap-value" id="headway-front">— 정거장</div>
+        <div class="term-sub">앞서 운행 중</div>
       </div>
       <div class="term-cell">
         <div class="term-role">후행 차량</div>
-        <div class="term-distance" id="headway-rear">확인 불가</div>
-        <div class="term-sub">뒤쪽 운행 차량</div>
+        <div class="term-distance term-gap-value" id="headway-rear">— 정거장</div>
+        <div class="term-sub">뒤에서 운행 중</div>
       </div>
     </div>
-    <div class="term-row" style="margin-top:9px">
+    <div class="term-current-stop">
+      <span class="term-muted">현재 정류소</span>
+      <strong id="headway-current-stop">정류소 확인 중</strong>
+    </div>
+    <div class="term-row" style="margin-top:7px">
       <span class="term-muted">배차 정보</span>
       <span class="term-value" id="headway-status">NPC 차량 데이터 없음</span>
     </div>
     <div class="term-muted" style="line-height:1.5;margin-top:7px">
-      현재는 NPC 차량이 구현되지 않아 선행·후행 차량을 계산하지 않습니다. NPC 추가 후 동일 노선·동일 방향 차량을 기준으로 연동합니다.
+      NPC 차량 추가 후 동일 노선·동일 방향 차량과의 정류소 간격을 표시합니다.
     </div>
   </section>
   <section class="term-page" data-terminal-page="operation" hidden>
@@ -312,6 +362,7 @@
     <div class="term-row"><span class="term-muted">다음 정류소</span><span class="term-value" id="terminal-next-stop">—</span></div>
     <div class="term-row"><span class="term-muted">차량 속도</span><span class="term-value" id="terminal-speed">0 km/h</span></div>
   </section>
+</div>
 </div>
 
 <div id="start">
@@ -1373,6 +1424,45 @@
     else if (level === 'bad') { txt = '위험 · 넘어질 수 있어요'; cls = 'bad'; }
     else if (level === 'warn') { txt = pax.standing > 0 ? '흔들림 · 입석 승객 불안' : '흔들림'; cls = 'warn'; }
     else { txt = '안정'; cls = 'ok'; }
+
+    // 운행정보 단말기 상단 안내: 탭 전환과 무관하게 항상 표시
+    let announcementText = '운행 중입니다.';
+    let announcementClass = '';
+    if (now / 1000 < pax.fallUntil) {
+      announcementText = '승객 안전에 유의해 주세요.';
+      announcementClass = 'announce-alert';
+    } else if (svc) {
+      const session = svc.sess;
+      const frontDoorOpen = doors.f.pos > 0.95;
+      if (session.inPlan > 0 && session.inDone >= session.inPlan) {
+        announcementText = '승객이 모두 승차하였습니다.';
+        announcementClass = 'announce-done';
+      } else if (session.inPlan > 0 && frontDoorOpen) {
+        announcementText = '승객이 승차하고 있습니다.';
+        announcementClass = 'announce-wait';
+      } else if (session.inPlan > 0) {
+        announcementText = '승객 승차 대기 중입니다. 앞문을 열어 주세요.';
+        announcementClass = 'announce-wait';
+      } else if (svc.waiting > 0) {
+        announcementText = '차내 혼잡으로 승객이 승차하지 못하고 있습니다.';
+        announcementClass = 'announce-wait';
+      } else if (session.outPlan > 0 && session.outDone < session.outPlan) {
+        announcementText = '하차 승객이 있습니다. 뒷문을 확인해 주세요.';
+        announcementClass = 'announce-wait';
+      } else {
+        announcementText = '승하차가 완료되었습니다. 출발할 수 있습니다.';
+        announcementClass = 'announce-done';
+      }
+    } else if (atStop) {
+      announcementText = '정류소에 정차 중입니다. 승하차를 확인해 주세요.';
+      announcementClass = 'announce-wait';
+    }
+    setText($('terminal-announcement-text'), announcementText);
+    const announcementEl = $('terminal-announcement');
+    if (announcementEl && announcementEl.className !== announcementClass) {
+      announcementEl.className = announcementClass;
+    }
+
     setText(el.pstate, txt);
     if (el.pstate.className !== 'state ' + cls) el.pstate.className = 'state ' + cls;
 
