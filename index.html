@@ -136,8 +136,13 @@
   #terminal .term-value { color:#f3f7ff; font-weight:700; font-variant-numeric:tabular-nums; }
 
 
-  #terminal-wrap {
+  #terminal-dock {
     position:absolute; z-index:1050; right:14px; bottom:14px;
+    display:flex; align-items:flex-end; gap:8px;
+    max-width:calc(100vw - 28px);
+  }
+  #terminal-wrap {
+    position:relative; right:auto; bottom:auto;
     width:330px; max-width:min(calc(100vw - 28px),390px);
     display:flex; flex-direction:column; gap:7px;
   }
@@ -202,8 +207,8 @@
   #terminal #pax .state.warn { color:#f0c36b; }
   #terminal #pax .state.bad { color:#ff8d8d; }
   #bell-hud {
-    position:absolute; z-index:1060; left:14px; top:14px;
-    display:flex; align-items:center; gap:8px; padding:7px 9px;
+    position:relative; z-index:1060; left:auto; top:auto; bottom:auto; right:auto;
+    display:flex; flex-direction:column; align-items:center; gap:6px; padding:8px 7px;
     border:1px solid #38516f; border-radius:9px;
     background:rgba(20,41,67,.96); color:#eaf3ff;
     box-shadow:0 4px 14px rgba(0,0,0,.22);
@@ -213,13 +218,13 @@
     background:#a31d1d; color:#000; font-weight:800; font-size:14px;
     letter-spacing:1px; border:1px solid #701212; border-radius:5px; user-select:none; }
   #bell.on { background:#ff2b2b; border-color:#ff6b6b; box-shadow:0 0 12px rgba(255,43,43,.55); }
-  body.menu #bell-hud, body.blocked #bell-hud { display:none; }
+  body.menu #terminal-dock, body.blocked #terminal-dock { display:none; }
   @media (max-width: 700px) {
-    #terminal-wrap { right:8px; bottom:8px; width:min(330px,calc(100vw - 16px)); }
-
+    #terminal-dock { right:8px; bottom:8px; gap:6px; max-width:calc(100vw - 16px); }
+    #terminal-wrap { width:min(330px,calc(100vw - 84px)); max-width:calc(100vw - 84px); }
     #terminal { right:8px; bottom:8px; width:min(330px, calc(100vw - 16px)); }
     #dash { left:8px; bottom:8px; width:180px; }
-    #bell-hud { left:8px; top:8px; padding:6px 7px; }
+    #bell-hud { padding:6px 5px; }
   }
 
   /* 정류소 마커 */
@@ -306,11 +311,11 @@
   </div>
 </div>
 
+<div id="terminal-dock">
 <div id="bell-hud" aria-label="하차벨 상태">
   <span id="bell-hud-label">하차벨</span>
   <div id="bell" role="img" aria-label="하차벨">STOP</div>
 </div>
-
 <div id="terminal-wrap">
 <div id="terminal-announcement" role="status" aria-live="polite">
   <span class="terminal-announcement-dot"></span>
@@ -385,6 +390,7 @@
     <div class="term-row"><span class="term-muted">다음 정류소</span><span class="term-value" id="terminal-next-stop">—</span></div>
     <div class="term-row"><span class="term-muted">차량 속도</span><span class="term-value" id="terminal-speed">0 km/h</span></div>
   </section>
+</div>
 </div>
 </div>
 
@@ -670,6 +676,7 @@
   const pax = { seated: 0, standing: 0, trips: [], fell: 0, skipped: 0, fallUntil: 0, lastFall: 0, last: null, totalIn: 0, totalOut: 0 };
   let route = null;          // { name, pts: [[lng, lat], ...] }
   let stops = [];            // 노선 순서대로 정렬된 정류소
+  let lastStoppedStopName = null; // 이번 노선에서 마지막으로 실제 정차한 정류소
   let currentFile = null, currentParsed = null;   // 지금 운행 중인 노선 (회차하면 바뀜)
   let startFile = null, startParsed = null;       // 처음 선택한 노선 ('처음으로' 때 복귀)
   let routeFiles = [];       // 현재 선택한 차고지에 표시할 노선
@@ -774,6 +781,7 @@
 
   function initStops() {
     clearMarkers();
+    lastStoppedStopName = null;
     const parsed = currentParsed;
     const fname = currentFile ? displayName(currentFile) : '';
     const places = correctedPlaces(parsed, currentFile);
@@ -1021,6 +1029,12 @@
     if (!d.open) {
       if (Math.abs(car.v) > 0.5) { toast('정차한 뒤에 문을 열 수 있어요'); return; }
       d.open = true;
+      // 뒷문을 열면 하차벨 표시와 대기 상태를 해제한다.
+      if (k === 'r' && bell.count > 0) {
+        bell.count = 0;
+        const bellEl = $('bell');
+        if (bellEl) bellEl.classList.remove('on');
+      }
       if (window.BusAudio) BusAudio.door(k === 'r' ? 'rear' : 'front', true);
     } else { d.open = false; if (window.BusAudio) BusAudio.door(k === 'r' ? 'rear' : 'front', false); }
   }
@@ -1044,6 +1058,7 @@
   }
   function beginService(st) {
     passEarlier(st);
+    lastStoppedStopName = st.name;
     // 정류소에 도착할 때 기존 승객의 남은 이용 정류소 수를 한 칸 줄임.
     // 이번 정류소에서 새로 타는 승객은 승차 이후에 목적지 카운트를 부여받음.
     pax.trips.forEach(t => { t.remaining = Math.max(0, t.remaining - 1); });
@@ -1312,6 +1327,7 @@
   function clearActiveRoute() {
     clearMarkers();
     stops = []; garages = []; firstPlace = null;
+    lastStoppedStopName = null;
     currentParsed = null; currentFile = null; route = null;
     startFile = null; startParsed = null;
     busS = 0; progT = 0;
@@ -1503,11 +1519,9 @@
     const nextStop = stops.find(s => s.state === 'pending');
     setText($('terminal-next-stop'), nextStop ? nextStop.name : '없음');
     const servicingStop = stops.find(s => s.state === 'servicing');
-    const previousStops = stops.filter(s => (s.state === 'done' || s.state === 'passed') && s.s <= busS + 5);
-    const previousStop = previousStops.length ? previousStops.reduce((a, b) => a.s > b.s ? a : b) : null;
-    const nearbyPending = nextStop && distM(car.lat, car.lng, nextStop.lat, nextStop.lng) <= CFG.stopRadius * 1.5 ? nextStop : null;
-    const currentStop = servicingStop || previousStop || nearbyPending;
-    setText($('headway-current-stop'), currentStop ? currentStop.name : (stops.length ? '정류소 사이' : '자유주행'));
+    // 실제 정차 중인 정류소를 우선하고, 주행 중에는 마지막 정차 기록을 유지한다.
+    const currentStopName = servicingStop ? servicingStop.name : lastStoppedStopName;
+    setText($('headway-current-stop'), currentStopName || (stops.length ? '아직 정차한 정류소 없음' : '자유주행'));
     setText($('terminal-speed'), Math.round(Math.abs(car.v) * 3.6) + ' km/h');
 
     let lastTxt = '';
