@@ -124,6 +124,13 @@
     background:#28527d; border-color:#6da8e2; color:#fff; font-weight:700;
   }
   #terminal .term-page { padding:10px 11px 12px; font-size:12px; }
+  #terminal .term-route-select {
+    display:block; width:100%; padding:8px 9px; border:1px solid #496584;
+    border-radius:7px; color:#f2f7ff; background:#1a304b; font-size:12px;
+  }
+  #terminal .term-route-select option { color:#17263a; background:#fff; }
+  #terminal .term-route-info { color:#9eb3cd; font-size:11px; line-height:1.45; margin:6px 1px 9px; }
+
   #terminal .term-page[hidden] { display:none; }
   #terminal .term-muted { color:#9eb3cd; }
   #terminal .term-value { color:#f3f7ff; font-weight:700; font-variant-numeric:tabular-nums; }
@@ -212,14 +219,6 @@
 </div>
 
 <div id="side">
-  <div id="route-control" class="hud">
-    <div style="font-weight:700;margin-bottom:6px">운행 노선</div>
-    <select id="game-route" aria-label="운행 노선 선택" style="width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)">
-      <option value="-1">노선 미선택 · 자유주행</option>
-    </select>
-    <div id="game-route-info" style="font-size:12px;color:var(--mute);margin-top:5px">운행 중 노선을 선택할 수 있습니다.</div>
-  </div>
-
   <div id="help" class="hud">
     <div class="keys">
       <b>W/↑</b> 가속 &nbsp; <b>S/↓</b> 브레이크·후진<br>
@@ -284,9 +283,9 @@
         <div class="term-sub">앞쪽 운행 차량</div>
       </div>
       <div class="term-cell mine">
-        <div class="term-role">내 차량</div>
-        <div class="term-distance">현재 위치</div>
-        <div class="term-sub">플레이어 차량</div>
+        <div class="term-role">현 위치</div>
+        <div class="term-distance" id="headway-current-stop">정류소 확인 중</div>
+        <div class="term-sub">현재 정류소</div>
       </div>
       <div class="term-cell">
         <div class="term-role">후행 차량</div>
@@ -303,7 +302,12 @@
     </div>
   </section>
   <section class="term-page" data-terminal-page="operation" hidden>
-    <div class="term-row"><span class="term-muted">노선</span><span class="term-value" id="terminal-route">노선 미선택</span></div>
+    <div class="term-muted" style="margin-bottom:6px">운행 노선 선택</div>
+    <select id="game-route" aria-label="운행 노선 선택" class="term-route-select">
+      <option value="-1">노선 미선택 · 자유주행</option>
+    </select>
+    <div id="game-route-info" class="term-route-info">운행 중 노선을 선택할 수 있습니다.</div>
+    <div class="term-row"><span class="term-muted">현재 노선</span><span class="term-value" id="terminal-route">노선 미선택</span></div>
     <div class="term-row"><span class="term-muted">운행 방향</span><span class="term-value" id="terminal-direction">—</span></div>
     <div class="term-row"><span class="term-muted">다음 정류소</span><span class="term-value" id="terminal-next-stop">—</span></div>
     <div class="term-row"><span class="term-muted">차량 속도</span><span class="term-value" id="terminal-speed">0 km/h</span></div>
@@ -1380,10 +1384,17 @@
                 : (stops.length ? '다음 정류소 없음' : '정류소 정보 없음');
     }
     setText(el.pnext, next);
-    setText($('terminal-route'), route ? route.name : '노선 미선택');
-    setText($('terminal-direction'), route ? (route.name.includes('방면') ? route.name : '현재 선택 노선') : '자유주행');
+    setText($('terminal-route'), currentFile ? displayName(currentFile) : '자유주행');
+    const directionName = currentFile ? (displayName(currentFile).match(/\\(([^)]+)\\)/) || [])[1] : '';
+    setText($('terminal-direction'), directionName || (currentFile ? '운행 중' : '자유주행'));
     const nextStop = stops.find(s => s.state === 'pending');
     setText($('terminal-next-stop'), nextStop ? nextStop.name : '없음');
+    const servicingStop = stops.find(s => s.state === 'servicing');
+    const previousStops = stops.filter(s => (s.state === 'done' || s.state === 'passed') && s.s <= busS + 5);
+    const previousStop = previousStops.length ? previousStops.reduce((a, b) => a.s > b.s ? a : b) : null;
+    const nearbyPending = nextStop && distM(car.lat, car.lng, nextStop.lat, nextStop.lng) <= CFG.stopRadius * 1.5 ? nextStop : null;
+    const currentStop = servicingStop || previousStop || nearbyPending;
+    setText($('headway-current-stop'), currentStop ? currentStop.name : (stops.length ? '정류소 사이' : '자유주행'));
     setText($('terminal-speed'), Math.round(Math.abs(car.v) * 3.6) + ' km/h');
 
     let lastTxt = '';
