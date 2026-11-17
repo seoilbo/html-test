@@ -23,8 +23,8 @@
 
   .hud { position: absolute; z-index: 1000; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; backdrop-filter: blur(6px); }
   .hud[hidden], #panel[hidden] { display: none; }
-  body.blocked .hud, body.blocked #car, body.blocked #side, body.blocked #start { display: none; }
-  body.menu .hud, body.menu #car, body.menu #side { display: none; }
+  body.blocked .hud, body.blocked #car, body.blocked #side, body.blocked #terminal, body.blocked #start { display: none; }
+  body.menu .hud, body.menu #car, body.menu #side, body.menu #terminal { display: none; }
 
   /* 계기판 */
   #dash { left: 14px; bottom: 14px; width: 204px; }
@@ -98,6 +98,60 @@
   #panel label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
   button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--car); outline-offset: 2px; }
 
+
+  /* 우측 하단 운행정보 단말기 */
+  #terminal {
+    position: absolute; z-index: 1050; right: 14px; bottom: 14px;
+    width: 330px; max-width: min( calc(100vw - 28px), 390px);
+    color: #e8f0fb; background: rgba(13, 27, 46, .96);
+    border: 1px solid #38516f; border-radius: 12px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.28); overflow: hidden;
+    backdrop-filter: blur(8px);
+  }
+  #terminal[hidden] { display: none; }
+  #terminal .term-head {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 9px 12px; background:#142943; border-bottom:1px solid #304761;
+    font-size:12px; letter-spacing:.04em; color:#a9c1df;
+  }
+  #terminal .term-head strong { color:#f2f7ff; font-size:13px; letter-spacing:0; }
+  #terminal .term-tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; padding:8px 9px 0; }
+  #terminal .term-tab {
+    min-width:0; padding:7px 4px; border:1px solid #3a526f; border-radius:6px;
+    background:#1a304b; color:#b9cbe0; font-size:12px; cursor:pointer;
+  }
+  #terminal .term-tab[aria-selected="true"] {
+    background:#28527d; border-color:#6da8e2; color:#fff; font-weight:700;
+  }
+  #terminal .term-page { padding:10px 11px 12px; font-size:12px; }
+  #terminal .term-page[hidden] { display:none; }
+  #terminal .term-muted { color:#9eb3cd; }
+  #terminal .term-value { color:#f3f7ff; font-weight:700; font-variant-numeric:tabular-nums; }
+  #terminal .term-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+  #terminal .term-cell { min-width:0; padding:9px 5px; text-align:center; background:#1a304b; border:1px solid #2d4562; border-radius:7px; }
+  #terminal .term-cell.mine { background:#244d75; border-color:#6da8e2; }
+  #terminal .term-cell .term-role { color:#a9c1df; font-size:11px; margin-bottom:5px; }
+  #terminal .term-cell .term-distance { color:#fff; font-size:16px; font-weight:750; line-height:1.25; }
+  #terminal .term-cell .term-sub { color:#a9bdd5; font-size:10px; margin-top:4px; }
+  #terminal .term-row { display:flex; justify-content:space-between; gap:10px; padding:5px 1px; border-bottom:1px solid #293f59; }
+  #terminal .term-row:last-child { border-bottom:0; }
+  #terminal #pax { position:static; width:auto; color:#e8f0fb; background:transparent; border:0; border-radius:0; padding:0; backdrop-filter:none; }
+  #terminal #pax .ttl small, #terminal #pax .grid, #terminal #pax .tot,
+  #terminal #pax .next, #terminal #pax .last { color:#a9bdd5; }
+  #terminal #pax .ttl b, #terminal #pax .cnt, #terminal #pax .grid b,
+  #terminal #pax .tot b, #terminal #pax .fl b { color:#f3f7ff; }
+  #terminal #pax .flow { background:#1a304b; }
+  #terminal #pax .fl span { color:#a9bdd5; }
+  #terminal #pax .state { border-color:#304761; }
+  #terminal #pax .state.ok { color:#75d6a4; }
+  #terminal #pax .state.warn { color:#f0c36b; }
+  #terminal #pax .state.bad { color:#ff8d8d; }
+  #terminal #bell { border-color:#762020; }
+  @media (max-width: 700px) {
+    #terminal { right:8px; bottom:8px; width:min(330px, calc(100vw - 16px)); }
+    #dash { left:8px; bottom:8px; width:180px; }
+  }
+
   /* 정류소 마커 */
   .stop { position: relative; width: 24px; height: 24px; pointer-events: none; }
   .stop .dot { width: 24px; height: 24px; border-radius: 50%; background: var(--route); color: #fff; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
@@ -165,26 +219,6 @@
     </select>
     <div id="game-route-info" style="font-size:12px;color:var(--mute);margin-top:5px">운행 중 노선을 선택할 수 있습니다.</div>
   </div>
-  <div id="pax" class="hud">
-    <div class="ttl"><b id="route-name">노선 없음</b><small id="pax-cap">정원 60명</small></div>
-    <div class="main">
-      <div class="cnt"><span class="n" id="pax-n">0</span><span>명 탑승</span></div>
-      <div id="bell" role="img" aria-label="하차벨">STOP</div>
-    </div>
-    <div class="grid">
-      <span>착석 <b id="pax-seat">0</b></span>
-      <span>입석 <b id="pax-stand">0</b></span>
-      <span>넘어짐 <b id="pax-fell">0</b></span>
-    </div>
-    <div class="flow">
-      <div class="fl"><span>하차</span><b id="fl-out">—</b></div>
-      <div class="fl"><span>승차</span><b id="fl-in">—</b></div>
-    </div>
-    <div class="tot" id="pax-tot">누적 승차 0명 · 하차 0명</div>
-    <div class="state ok" id="pax-state">승객 없음</div>
-    <div class="next" id="pax-next">정류소 정보 없음</div>
-    <div class="last" id="pax-last"></div>
-  </div>
 
   <div id="help" class="hud">
     <div class="keys">
@@ -208,6 +242,72 @@
     <label><input type="checkbox" id="trail"> 주행 궤적 남기기</label>
     <label class="sound-setting">엔진음 음량 <input type="range" id="sound-volume" min="0" max="1" step="0.05" value="0.65"><span id="sound-volume-value">65%</span></label>
   </div>
+</div>
+
+<div id="terminal" hidden aria-label="운행정보 단말기">
+  <div class="term-head">
+    <strong>운행정보 단말기</strong>
+    <span>BUS TERMINAL</span>
+  </div>
+  <div class="term-tabs" role="tablist" aria-label="운행정보 화면">
+    <button class="term-tab" type="button" role="tab" data-terminal-tab="passengers" aria-selected="true">승객 정보</button>
+    <button class="term-tab" type="button" role="tab" data-terminal-tab="headway" aria-selected="false">배차 간격</button>
+    <button class="term-tab" type="button" role="tab" data-terminal-tab="operation" aria-selected="false">운행 정보</button>
+  </div>
+  <section class="term-page" data-terminal-page="passengers">
+    <div id="pax" class="hud">
+    <div class="ttl"><b id="route-name">노선 없음</b><small id="pax-cap">정원 60명</small></div>
+    <div class="main">
+      <div class="cnt"><span class="n" id="pax-n">0</span><span>명 탑승</span></div>
+      <div id="bell" role="img" aria-label="하차벨">STOP</div>
+    </div>
+    <div class="grid">
+      <span>착석 <b id="pax-seat">0</b></span>
+      <span>입석 <b id="pax-stand">0</b></span>
+      <span>넘어짐 <b id="pax-fell">0</b></span>
+    </div>
+    <div class="flow">
+      <div class="fl"><span>하차</span><b id="fl-out">—</b></div>
+      <div class="fl"><span>승차</span><b id="fl-in">—</b></div>
+    </div>
+    <div class="tot" id="pax-tot">누적 승차 0명 · 하차 0명</div>
+    <div class="state ok" id="pax-state">승객 없음</div>
+    <div class="next" id="pax-next">정류소 정보 없음</div>
+    <div class="last" id="pax-last"></div>
+  </div>
+  </section>
+  <section class="term-page" data-terminal-page="headway" hidden>
+    <div class="term-grid">
+      <div class="term-cell">
+        <div class="term-role">선행 차량</div>
+        <div class="term-distance" id="headway-front">확인 불가</div>
+        <div class="term-sub">앞쪽 운행 차량</div>
+      </div>
+      <div class="term-cell mine">
+        <div class="term-role">내 차량</div>
+        <div class="term-distance">현재 위치</div>
+        <div class="term-sub">플레이어 차량</div>
+      </div>
+      <div class="term-cell">
+        <div class="term-role">후행 차량</div>
+        <div class="term-distance" id="headway-rear">확인 불가</div>
+        <div class="term-sub">뒤쪽 운행 차량</div>
+      </div>
+    </div>
+    <div class="term-row" style="margin-top:9px">
+      <span class="term-muted">배차 정보</span>
+      <span class="term-value" id="headway-status">NPC 차량 데이터 없음</span>
+    </div>
+    <div class="term-muted" style="line-height:1.5;margin-top:7px">
+      현재는 NPC 차량이 구현되지 않아 선행·후행 차량을 계산하지 않습니다. NPC 추가 후 동일 노선·동일 방향 차량을 기준으로 연동합니다.
+    </div>
+  </section>
+  <section class="term-page" data-terminal-page="operation" hidden>
+    <div class="term-row"><span class="term-muted">노선</span><span class="term-value" id="terminal-route">노선 미선택</span></div>
+    <div class="term-row"><span class="term-muted">운행 방향</span><span class="term-value" id="terminal-direction">—</span></div>
+    <div class="term-row"><span class="term-muted">다음 정류소</span><span class="term-value" id="terminal-next-stop">—</span></div>
+    <div class="term-row"><span class="term-muted">차량 속도</span><span class="term-value" id="terminal-speed">0 km/h</span></div>
+  </section>
 </div>
 
 <div id="start">
@@ -462,6 +562,24 @@
         '외부 지도 데이터를 막는 환경(예: 미리보기 창)에서는 지도가 보이지 않아요. 일반 브라우저나 GitHub Pages 주소에서 열어 보세요.');
     }
   });
+
+
+  // ───────── 운행정보 단말기 탭 ─────────
+  let terminalTab = 'passengers';
+  function selectTerminalTab(name) {
+    terminalTab = name;
+    document.querySelectorAll('[data-terminal-tab]').forEach(btn => {
+      const active = btn.dataset.terminalTab === name;
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    document.querySelectorAll('[data-terminal-page]').forEach(page => {
+      page.hidden = page.dataset.terminalPage !== name;
+    });
+  }
+  document.querySelectorAll('[data-terminal-tab]').forEach(btn => {
+    btn.addEventListener('click', () => selectTerminalTab(btn.dataset.terminalTab));
+  });
+  selectTerminalTab(terminalTab);
 
   // ───────── 상태 ─────────
   const car = {
@@ -976,6 +1094,7 @@
   function toMenu() {
     setPause(false);
     phase = 'menu';
+    $('terminal').hidden = true;
     if (window.BusAudio) BusAudio.pause(true);
     document.body.classList.add('menu');
     $('start').hidden = false;
@@ -1188,6 +1307,7 @@
       S.bus = c.file; S.route = null; saveS();
       resetAll();
       phase = 'play';
+      $('terminal').hidden = false;
       $('start').hidden = true;
       document.body.classList.remove('menu');
       last = performance.now();
@@ -1260,6 +1380,11 @@
                 : (stops.length ? '다음 정류소 없음' : '정류소 정보 없음');
     }
     setText(el.pnext, next);
+    setText($('terminal-route'), route ? route.name : '노선 미선택');
+    setText($('terminal-direction'), route ? (route.name.includes('방면') ? route.name : '현재 선택 노선') : '자유주행');
+    const nextStop = stops.find(s => s.state === 'pending');
+    setText($('terminal-next-stop'), nextStop ? nextStop.name : '없음');
+    setText($('terminal-speed'), Math.round(Math.abs(car.v) * 3.6) + ' km/h');
 
     let lastTxt = '';
     if (pax.last) lastTxt = '직전 ' + pax.last.name + ' · 하차 ' + pax.last.out + ' · 승차 ' + pax.last.inn;
