@@ -165,8 +165,12 @@
   #terminal-announcement.announce-wait .terminal-announcement-dot { background:#e6b75d; }
   #terminal-announcement.announce-done .terminal-announcement-dot { background:#70d5a0; }
   #terminal-announcement.announce-alert .terminal-announcement-dot { background:#f07878; }
-  #terminal .term-headway-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  #terminal .term-gap-value { font-size:23px; line-height:1.2; white-space:nowrap; }
+  #terminal .term-headway-grid { grid-template-columns:repeat(3,minmax(0,1fr)); align-items:stretch; }
+  #terminal .term-gap-value { font-size:20px; line-height:1.2; white-space:nowrap; }
+  #terminal .term-cell.mine { display:flex; flex-direction:column; justify-content:center; }
+  #terminal .term-cell.mine .term-distance { font-size:16px; }
+  #terminal .term-cell.mine .term-sub { white-space:normal; line-height:1.35; }
+  #terminal .term-cell.mine .term-current-stop-name { display:block; margin-top:5px; color:#fff; font-size:11px; font-weight:650; line-height:1.3; overflow-wrap:anywhere; }
   #terminal .term-current-stop {
     display:flex; align-items:baseline; justify-content:space-between; gap:10px;
     margin-top:9px; padding:7px 9px; border-radius:6px;
@@ -197,12 +201,25 @@
   #terminal #pax .state.ok { color:#75d6a4; }
   #terminal #pax .state.warn { color:#f0c36b; }
   #terminal #pax .state.bad { color:#ff8d8d; }
-  #terminal #bell { border-color:#762020; }
+  #bell-hud {
+    position:absolute; z-index:1060; left:14px; top:14px;
+    display:flex; align-items:center; gap:8px; padding:7px 9px;
+    border:1px solid #38516f; border-radius:9px;
+    background:rgba(20,41,67,.96); color:#eaf3ff;
+    box-shadow:0 4px 14px rgba(0,0,0,.22);
+  }
+  #bell-hud-label { font-size:11px; color:#b9cbe0; font-weight:650; }
+  #bell { width:48px; height:42px; flex:none; display:grid; place-items:center;
+    background:#a31d1d; color:#000; font-weight:800; font-size:14px;
+    letter-spacing:1px; border:1px solid #701212; border-radius:5px; user-select:none; }
+  #bell.on { background:#ff2b2b; border-color:#ff6b6b; box-shadow:0 0 12px rgba(255,43,43,.55); }
+  body.menu #bell-hud, body.blocked #bell-hud { display:none; }
   @media (max-width: 700px) {
     #terminal-wrap { right:8px; bottom:8px; width:min(330px,calc(100vw - 16px)); }
 
     #terminal { right:8px; bottom:8px; width:min(330px, calc(100vw - 16px)); }
     #dash { left:8px; bottom:8px; width:180px; }
+    #bell-hud { left:8px; top:8px; padding:6px 7px; }
   }
 
   /* 정류소 마커 */
@@ -289,6 +306,11 @@
   </div>
 </div>
 
+<div id="bell-hud" aria-label="하차벨 상태">
+  <span id="bell-hud-label">하차벨</span>
+  <div id="bell" role="img" aria-label="하차벨">STOP</div>
+</div>
+
 <div id="terminal-wrap">
 <div id="terminal-announcement" role="status" aria-live="polite">
   <span class="terminal-announcement-dot"></span>
@@ -309,7 +331,6 @@
     <div class="ttl"><b id="route-name">노선 없음</b><small id="pax-cap">정원 60명</small></div>
     <div class="main">
       <div class="cnt"><span class="n" id="pax-n">0</span><span>명 탑승</span></div>
-      <div id="bell" role="img" aria-label="하차벨">STOP</div>
     </div>
     <div class="grid">
       <span>착석 <b id="pax-seat">0</b></span>
@@ -333,15 +354,17 @@
         <div class="term-distance term-gap-value" id="headway-front">— 정거장</div>
         <div class="term-sub">앞서 운행 중</div>
       </div>
+      <div class="term-cell mine">
+        <div class="term-role">내 차량</div>
+        <div class="term-distance">운행 중</div>
+        <div class="term-sub">현재 정류소</div>
+        <strong class="term-current-stop-name" id="headway-current-stop">정류소 확인 중</strong>
+      </div>
       <div class="term-cell">
         <div class="term-role">후행 차량</div>
         <div class="term-distance term-gap-value" id="headway-rear">— 정거장</div>
         <div class="term-sub">뒤에서 운행 중</div>
       </div>
-    </div>
-    <div class="term-current-stop">
-      <span class="term-muted">현재 정류소</span>
-      <strong id="headway-current-stop">정류소 확인 중</strong>
     </div>
     <div class="term-row" style="margin-top:7px">
       <span class="term-muted">배차 정보</span>
