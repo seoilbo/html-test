@@ -281,7 +281,7 @@
   <div class="row"><span class="num" id="spd">0</span><span class="unit">km/h</span><span class="gear" id="gear">D1</span></div>
   <div class="rpm"><i id="rpmbar"></i></div>
   <div class="sub"><span id="rpmtxt">650 rpm</span><span id="cl">클러치</span></div>
-  <div class="sub" id="retrow"><span>리타더</span><b id="ret">OFF</b></div>
+  <div class="sub" id="retrow"><span>회생제동</span><b id="ret">OFF</b></div>
   <div class="lamps"><span id="lamp-f">앞문</span><span id="lamp-r">뒷문</span><span id="lamp-p">P</span></div>
   <div class="comfort ok" id="comfort"><span id="cmsg">승객 쾌적</span><small id="cg">0.0 m/s²</small></div>
 </div>
@@ -292,7 +292,7 @@
       <b>W/↑</b> 가속 &nbsp; <b>S/↓</b> 브레이크·후진<br>
       <b>A/D, ←/→</b> 조향 &nbsp; <b>Space</b> 비상브레이크<br>
       <b>F</b> 앞문 &nbsp; <b>G</b> 뒷문 &nbsp; <b>P</b> 주차브레이크<br>
-      <div class="a-only"><b>R</b> 리타더 줄이기 &nbsp; <b>T</b> 높이기<br></div>
+      <div class="a-only"><b>R</b> 회생제동 단계 낮추기 &nbsp; <b>T</b> 높이기<br></div>
       <div class="m-only"><b>Shift</b> 클러치 &nbsp; <b>E/Q</b> 기어 업/다운<br></div>
       <b>Z/X</b> 지도 확대/축소 &nbsp; <b>0/9</b> 카메라 기울기 낮춤/높임<br>
       <b>/</b> 정지화면
@@ -1163,7 +1163,7 @@
     car.gear = seq[i];
   }
   function retarderBy(d) {
-    if (!VEH.retarder) { toast('이 버스에는 리타더가 없어요'); return; }
+    if (!VEH.retarder) { toast('이 버스에는 회생제동 기능이 없어요'); return; }
     car.ret = clamp(car.ret + d, 0, VEH.retarder.decel.length - 1);
     if (window.BusAudio) BusAudio.setRetarder(car.ret);
   }
@@ -1271,7 +1271,7 @@
   let selectingRoute = false;
   function showBusInfo() {
     const c = cars[Number(selBus.value)];
-    setText($('bus-info'), c ? (c.transmission === 'manual' ? '수동' : '자동') + ' 변속 · 정원 ' + c.capacity + '명 · 리타더 ' + (c.retarder ? '있음' : '없음') : '');
+    setText($('bus-info'), c ? (c.transmission === 'manual' ? '수동' : '자동') + ' 변속 · 정원 ' + c.capacity + '명 · 회생제동 ' + (c.retarder ? '있음' : '없음') : '');
   }
   function renderDepotInfo() {
     const d = depots[Number(selGarage.value)];
